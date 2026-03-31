@@ -35,8 +35,9 @@ jobs:
     - name: Push to Registry
       if: github.ref == 'refs/heads/main'
       run: |
-        docker tag vajra-forensic:latest ghcr.io/${{ github.repository_owner }}/vajra-forensic:latest
-        docker push ghcr.io/${{ github.repository_owner }}/vajra-forensic:latest
+        OWNER_LC="${{ github.repository_owner }}"
+        docker tag vajra-forensic:latest ghcr.io/${OWNER_LC,,}/vajra-forensic:latest
+        docker push ghcr.io/${OWNER_LC,,}/vajra-forensic:latest
         
   deploy-staging:
     needs: build-and-test
@@ -51,5 +52,6 @@ jobs:
         username: ${{ secrets.STAGING_USER }}
         key: ${{ secrets.STAGING_SSH_KEY }}
         script: |
-          docker pull ghcr.io/${{ github.repository_owner }}/vajra-forensic:latest
+          OWNER_LC="${{ github.repository_owner }}"
+          docker pull ghcr.io/${OWNER_LC,,}/vajra-forensic:latest
           docker-compose -f deployment/docker-compose.yml up -d
