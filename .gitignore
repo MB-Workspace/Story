@@ -1,0 +1,47 @@
+# System files
+.DS_Store
+Thumbs.db
+
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment variables
+.env
+.env.local
+
+# Log files
+*.log
+logs/
+
+# Data files
+*.db
+*.sqlite
+*.csv
+*.parquet
+
+# Virtual environments
+venv/
+.env/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# IDE specific
+.vscode/
+.idea/
+
+# Docker artifacts
+docker-compose.override.yml
+
+# Security
+*.key
+*.pem
+*.cert
+
+# Internal drafts
+_drafts/

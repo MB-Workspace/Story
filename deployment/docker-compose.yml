@@ -1,0 +1,68 @@
+services:
+  vajra-core:
+    image: vajra-forensic:latest
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    env_file:
+      - ../.env
+    environment:
+      - LOG_LEVEL=INFO
+    ports:
+      - "8000:8000"
+    command: >
+      gunicorn -w 4 -k uvicorn.workers.UvicornWorker
+      project_vajra.vajra_api:app
+      --bind 0.0.0.0:8000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    depends_on:
+      redis:
+        condition: service_started
+
+  vajra-worker:
+    image: vajra-forensic:latest
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile
+    command: >
+      celery -A project_vajra.vajra_tasks worker
+      --loglevel=info
+      --concurrency=4
+    env_file:
+      - ../.env
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      redis:
+        condition: service_started
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  monitoring:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+
+volumes:
+  grafana-data:
